@@ -7,7 +7,7 @@
  */
 export async function loadTerrainFromCSV(filename) {
   try {
-    const response = await fetch(`/obstacle-maps/${filename}`);
+    const response = await fetch(`${import.meta.env.BASE_URL}obstacle-maps/${filename}`);
     if (!response.ok) {
       throw new Error(`Failed to load ${filename}: ${response.statusText}`);
     }
