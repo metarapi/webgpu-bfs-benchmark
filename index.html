@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en" class="dark" data-theme="vscode">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BFS Benchmark Dashboard</title>
+  <link href="/src/style.css" rel="stylesheet">
+  <!-- Tabler Icons webfont (used for navbar GitHub icon) -->
+  <link rel="stylesheet" href="https://unpkg.com/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css">
+  <style>
+    /* Toggle between outlined and filled GitHub icons on hover */
+    .nav-github .ti-brand-github-filled { display: none; }
+    .nav-github:hover .ti-brand-github { display: none; }
+    .nav-github:hover .ti-brand-github-filled { display: inline-block; }
+  </style>
+</head>
+
+<body class="bg-base-100 text-base-content">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 z-50 w-full bg-base-200 border-b border-base-300">
+    <div class="px-3 py-3 lg:px-5 lg:pl-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center justify-start">
+          <a href="#" class="flex ms-2 md:me-24">
+            <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-base-content">BFS Benchmark
+              Dashboard</span>
+          </a>
+        </div>
+        <div class="flex items-center">
+          <a href="https://github.com/metarapi/webgpu-bfs-benchmark"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open repository on GitHub"
+            class="p-1 rounded-none nav-github inline-flex items-center"
+            title="Open repository on GitHub">
+            <i class="ti ti-brand-github w-8 h-8 text-3xl text-base-content inline-block align-middle flex-shrink-0" aria-hidden="true"></i>
+            <i class="ti ti-brand-github-filled w-8 h-8 text-3xl text-base-content inline-block align-middle flex-shrink-0" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content - 2 Column Layout (1:4) -->
+  <div class="pt-14 px-2 h-screen flex flex-row gap-2">
+
+    <!-- Left Column (1 part) - Global Controls & Console -->
+    <div class="flex-[1] flex flex-col gap-2 min-w-0">
+      <!-- Global Controls -->
+      <div class="p-2 border-2 border-base-300 rounded-none bg-base-200 flex-shrink-0">
+        <h3 class="text-sm font-semibold mb-3 text-base-content">Global Settings</h3>
+
+        <!-- Map Size Select -->
+        <div class="mb-3">
+          <label for="mapSize" class="block mb-2 text-xs font-medium text-base-content/70 uppercase">Map Size</label>
+          <select id="mapSize"
+            class="bg-base-200 border border-base-300 text-base-content text-sm rounded-none focus:ring-primary focus:border-primary block w-full p-1">
+            <option value="256">256 × 256</option>
+            <option value="512" selected>512 × 512</option>
+            <option value="1024">1024 × 1024</option>
+          </select>
+        </div>
+
+      <!-- Iterations Inputs (side by side) -->
+      <div class="mb-3">
+        <label class="block mb-2 text-xs font-medium text-base-content/70 uppercase">Iterations</label>
+        <div class="flex flex-row gap-2">
+          <!-- Global Iterations -->
+          <div class="flex-1">
+            <label for="globalIterations" class="block mb-1 text-xs text-base-content/60">Global</label>
+            <input type="number" id="globalIterations" min="1" max="10000" value="50" class="bg-base-200 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-1">
+          </div>
+          <!-- Inner/Workgroup Iterations -->
+          <div class="flex-1">
+            <label for="innerIterations" class="block mb-1 text-xs text-base-content/60">Inner (WG)</label>
+            <input type="number" id="innerIterations" min="1" max="100" value="46" class="bg-base-200 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-1">
+          </div>
+        </div>
+      </div>
+
+        <!-- Storage Type Switch -->
+        <div class="mb-3">
+          <label class="flex items-center justify-between gap-3 cursor-pointer">
+            <span class="text-sm font-medium text-base-content">Storage Textures</span>
+            <input type="checkbox" id="useTextures" class="switch switch-primary">
+          </label>
+        </div>
+
+        <!-- Early Out Switch -->
+        <div class="mb-4">
+          <label class="flex items-center justify-between gap-3 cursor-pointer">
+            <span class="text-sm font-medium text-base-content">Early Out</span>
+            <input type="checkbox" id="earlyOut" class="switch switch-primary" checked>
+          </label>
+        </div>
+
+        <!-- Run Button -->
+        <button id="runBFS"
+          class="w-full text-primary-content bg-primary hover:bg-primary/90 focus:ring-4 focus:outline-none focus:ring-primary/60 font-medium text-sm px-5 py-2.5 text-center">
+          Run BFS Benchmark
+        </button>
+      </div>
+
+      <!-- Console Output -->
+      <div class="flex-1 flex flex-col border-2 border-base-300 rounded-none bg-base-200 overflow-hidden min-h-0">
+        <!-- Console container (no heading; fills area) -->
+        <div class="flex-1 relative bg-base-300 border border-base-300 overflow-hidden rounded-none"
+          style="min-height: 0;">
+          <pre id="console-output"
+            class="h-full overflow-y-auto font-mono text-xs text-base-content/80 whitespace-pre-wrap m-0 p-0"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column (4 parts) - Plots & Settings -->
+    <div class="flex-[4] flex flex-col gap-2 min-w-0">
+
+      <!-- Top Row - Two Heatmaps -->
+      <div class="flex-1 flex flex-row gap-2 min-h-0">
+        <!-- Left Heatmap - Input -->
+        <div class="flex-1 p-2 border-2 border-base-300 rounded-none bg-base-200 overflow-hidden min-w-0">
+          <h3 class="text-lg font-semibold mb-2 text-base-content">Obstacle/Cost Map (Input)</h3>
+          <div id="heatmap-input" class="w-full h-[calc(100%-2.5rem)]"></div>
+        </div>
+
+        <!-- Right Heatmap - Output -->
+        <div class="flex-1 p-2 border-2 border-base-300 rounded-none bg-base-200 overflow-hidden min-w-0">
+          <h3 class="text-lg font-semibold mb-2 text-base-content">Shader Output (Distance Field)</h3>
+          <div id="heatmap-output" class="w-full h-[calc(100%-2.5rem)]"></div>
+        </div>
+      </div>
+
+      <!-- Bottom Row - Two Settings Panels -->
+      <div class="flex flex-row gap-2 flex-shrink-0">
+        <!-- Left Settings - Input Map Controls -->
+        <div class="flex-1 p-2 border-2 border-base-300 rounded-none bg-base-200">
+          <h3 class="text-sm font-semibold mb-3 text-base-content">Input Map Settings</h3>
+
+          <!-- Single row of headings -->
+          <div class="flex flex-row gap-2 mb-2">
+            <h4 class="flex-1 text-xs font-medium text-base-content/70 uppercase">Obstacle Type</h4>
+            <h4 class="text-xs font-medium text-base-content/70 uppercase">Cost Mode</h4>
+          </div>
+
+          <!-- Two Column Layout: Radio Grid (left) | Toggle (right) -->
+          <div class="flex flex-row gap-2">
+            <!-- Left: Obstacle Map Radio Grid (2x2) -->
+            <div class="flex-1">
+              <ul class="grid w-full gap-1 grid-cols-2">
+                <li>
+                  <input type="radio" id="map-dla" name="obstacleMap" value="dla-maze" class="hidden peer" checked>
+                  <label for="map-dla"
+                    class="inline-flex items-center justify-center w-full p-1 text-xs bg-base-300 border border-base-300 rounded-none cursor-pointer peer-checked:border-primary peer-checked:bg-base-100 hover:bg-base-300 text-center">
+                    <div class="block">
+                      <div class="w-full font-semibold text-white">DLA Maze</div>
+                    </div>
+                  </label>
+                </li>
+                <li>
+                  <input type="radio" id="map-rotated" name="obstacleMap" value="maze-rotated" class="hidden peer">
+                  <label for="map-rotated"
+                    class="inline-flex items-center justify-center w-full p-1 text-xs bg-base-300 border border-base-300 rounded-none cursor-pointer peer-checked:border-primary peer-checked:bg-base-100 hover:bg-base-300 text-center">
+                    <div class="block">
+                      <div class="w-full font-semibold text-white">Hilbert Curve</div>
+                    </div>
+                  </label>
+                </li>
+                <li>
+                  <input type="radio" id="map-organic" name="obstacleMap" value="organic" class="hidden peer">
+                  <label for="map-organic"
+                    class="inline-flex items-center justify-center w-full p-1 text-xs bg-base-300 border border-base-300 rounded-none cursor-pointer peer-checked:border-primary peer-checked:bg-base-100 hover:bg-base-300 text-center">
+                    <div class="block">
+                      <div class="w-full font-semibold text-white">Organic</div>
+                    </div>
+                  </label>
+                </li>
+                <li>
+                  <input type="radio" id="map-none" name="obstacleMap" value="no-obstacle" class="hidden peer">
+                  <label for="map-none"
+                    class="inline-flex items-center justify-center w-full p-1 text-xs bg-base-300 border border-base-300 rounded-none cursor-pointer peer-checked:border-primary peer-checked:bg-base-100 hover:bg-base-300 text-center">
+                    <div class="block">
+                      <div class="w-full font-semibold text-white">No Obstacles</div>
+                    </div>
+                  </label>
+                </li>
+              </ul>
+            </div>
+
+            <!-- Right: Uniform Cost Switch -->
+            <div class="flex flex-col justify-center">
+              <label class="flex items-center justify-between gap-3 cursor-pointer">
+                <span class="text-sm font-medium text-base-content">Uniform Cost</span>
+                <input type="checkbox" id="uniformCost" class="switch switch-primary" checked>
+              </label>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- Right Settings - Output Map Controls -->
+        <div class="flex-1 p-2 border-2 border-base-300 rounded-none bg-base-200">
+          <h3 class="text-sm font-semibold mb-3 text-base-content">Output Map Settings</h3>
+
+          <!-- BFS Shader Select -->
+          <div>
+            <label for="bfsShader" class="block mb-2 text-xs font-medium text-base-content/70 uppercase">Shader Output</label>
+            <select id="bfsShader"
+              class="bg-base-200 border border-base-300 text-base-content text-sm rounded-none focus:ring-primary focus:border-primary block w-full p-2">
+              <!-- Options populated dynamically by JS -->
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
