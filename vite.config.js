@@ -1,14 +1,14 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 
-export default defineConfig({
-  // Use root base for local development; the CI/deploy can set
-  // the repo subpath when publishing (e.g. GitHub Pages).
-  base: '/',
-  plugins: [
-    tailwindcss(),
-  ],
-  build: {
-    outDir: 'dist'
+export default defineConfig(({ command, mode }) => {
+  const base = command === 'build' ? '/webgpu-bfs-benchmark/' : '/'
+  
+  return {
+    base,
+    plugins: [tailwindcss()],
+    build: {
+      outDir: 'dist'
+    }
   }
 })
