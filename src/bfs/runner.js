@@ -81,7 +81,17 @@ export async function runAllBFS(gpuContext, config, logger) {
       logger.info(`${result.label.padEnd(30)} ${result.avgTimeMs.toFixed(4)} ms/iter (${result.totalTimeMs.toFixed(2)} ms total)`);
     }
   }
-  
+
+  logger.info('═'.repeat(50));
+  logger.info('Throughput');
+  logger.info('═'.repeat(50));
+  for (const result of results) {
+    if (result.filled && result.totalTimeMs) {
+      const throughput = result.filled / result.totalTimeMs;
+      logger.info(`${result.label.padEnd(30)} ${Math.round(throughput)} cells/ms`);
+    }
+  }
+
   return results;
 }
 
