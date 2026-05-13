@@ -8,7 +8,7 @@ import BF_8x8 from '../shaders/8x8/StorageBufferBased/BF-tiled-8x8.wgsl?raw';
 import BF_8x8_lib from '../shaders/8x8/StorageBufferBased/BF-tiled-library-8x8.wgsl?raw';
 import BF_16x16 from '../shaders/16x16/StorageBufferBased/BF-tiled-16x16.wgsl?raw';
 import BF_16x16_lib from '../shaders/16x16/StorageBufferBased/BF-tiled-library-16x16.wgsl?raw';
-import BF_16x16_subgroup from '../shaders/16x16/SubgroupBased/BF-subgroup.wgsl?raw';
+import BF_16x16_subgroup from '../shaders/16x16/SubgroupBased/BF-subgroup-16x16.wgsl?raw';
 import BF_32x32 from '../shaders/32x32/StorageBufferBased/BF-tiled-32x32.wgsl?raw';
 import BF_32x32_lib from '../shaders/32x32/StorageBufferBased/BF-tiled-library-32x32.wgsl?raw';
 
@@ -18,6 +18,7 @@ import BF_tex_8x8 from '../shaders/8x8/StorageTextureBased/BF-tex-tiled-8x8.wgsl
 import BF_tex_8x8_lib from '../shaders/8x8/StorageTextureBased/BF-tex-tiled-library-8x8.wgsl?raw';
 import BF_tex_16x16 from '../shaders/16x16/StorageTextureBased/BF-tex-tiled-16x16.wgsl?raw';
 import BF_tex_16x16_lib from '../shaders/16x16/StorageTextureBased/BF-tex-tiled-library-16x16.wgsl?raw';
+import BF_tex_16x16_subgroup from '../shaders/16x16/SubgroupBased/BF-tex-subgroup-16x16.wgsl?raw';
 import BF_tex_32x32 from '../shaders/32x32/StorageTextureBased/BF-tex-tiled-32x32.wgsl?raw';
 import BF_tex_32x32_lib from '../shaders/32x32/StorageTextureBased/BF-tex-tiled-library-32x32.wgsl?raw';
 
@@ -28,6 +29,13 @@ export const bufferShaders = {
   'BF 8x8 lib': { code: BF_8x8_lib, label: 'Tile 8×8 Library', workgroupSize: [8, 8] },
   'BF 16x16': { code: BF_16x16, label: 'Tile 16×16', workgroupSize: [16, 16] },
   'BF 16x16 lib': { code: BF_16x16_lib, label: 'Tile 16×16 Library', workgroupSize: [16, 16] },
+  'BF 16x16 subgroup': {
+    code: BF_16x16_subgroup,
+    label: 'Tile 16×16 Subgroup',
+    workgroupSize: [16, 16],
+    requiredFeatures: ['subgroups'],
+    uniformProfile: 'subgroup'
+  },
   'BF 32x32': { code: BF_32x32, label: 'Tile 32×32', workgroupSize: [32, 32] },
   'BF 32x32 lib': { code: BF_32x32_lib, label: 'Tile 32×32 Library', workgroupSize: [32, 32] },
 };
@@ -39,7 +47,7 @@ export const textureShaders = {
   'BF tex 16x16': { code: BF_tex_16x16, label: 'Tile 16×16 (Tex)', workgroupSize: [16, 16] },
   'BF tex 16x16 lib': { code: BF_tex_16x16_lib, label: 'Tile 16×16 Library (Tex)', workgroupSize: [16, 16] },
   'BF tex 16x16 subgroup': {
-    code: BF_16x16_subgroup,
+    code: BF_tex_16x16_subgroup,
     label: 'Tile 16×16 Subgroup (Tex)',
     workgroupSize: [16, 16],
     requiredFeatures: ['subgroups'],
