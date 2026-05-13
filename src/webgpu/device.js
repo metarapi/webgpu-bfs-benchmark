@@ -19,6 +19,9 @@ export async function initWebGPU() {
   if (adapter.features.has('timestamp-query')) {
     features.push('timestamp-query');
   }
+  if (adapter.features.has('subgroups')) {
+    features.push('subgroups');
+  }
 
   // Request higher limits for large tiled workgroups
   const requiredLimits = {
@@ -46,6 +49,7 @@ export async function initWebGPU() {
   });
 
   const canTimestamp = device.features.has('timestamp-query');
+  const canSubgroups = device.features.has('subgroups');
 
-  return { adapter, device, canTimestamp };
+  return { adapter, device, canTimestamp, canSubgroups };
 }

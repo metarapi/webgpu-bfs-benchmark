@@ -3,9 +3,9 @@
  */
 
 /**
- * Create bind group layout for storage buffer-based BFS
+ * Create bind group layout for storage buffer-based BF
  */
-export function createBFSBindGroupLayout(device) {
+export function createBFBindGroupLayout(device) {
   return device.createBindGroupLayout({
     entries: [
       { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },  // terrain
@@ -17,9 +17,9 @@ export function createBFSBindGroupLayout(device) {
 }
 
 /**
- * Create bind group layout for texture-based BFS
+ * Create bind group layout for texture-based BF
  */
-export function createBFSTexBindGroupLayout(device) {
+export function createBFTexBindGroupLayout(device) {
   return device.createBindGroupLayout({
     entries: [
       { binding: 0, visibility: GPUShaderStage.COMPUTE, storageTexture: { access: 'read-only', format: 'r32float' } },   // terrain
@@ -31,9 +31,9 @@ export function createBFSTexBindGroupLayout(device) {
 }
 
 /**
- * Create bind group for buffer-based BFS (ping or pong)
+ * Create bind group for buffer-based BF (ping or pong)
  */
-export function createBFSBindGroup(device, layout, terrainBuffer, distanceIn, distanceOut, uniformBuffer) {
+export function createBFBindGroup(device, layout, terrainBuffer, distanceIn, distanceOut, uniformBuffer) {
   return device.createBindGroup({
     layout,
     entries: [
@@ -46,9 +46,9 @@ export function createBFSBindGroup(device, layout, terrainBuffer, distanceIn, di
 }
 
 /**
- * Create bind group for texture-based BFS (ping or pong)
+ * Create bind group for texture-based BF (ping or pong)
  */
-export function createBFSTexBindGroup(device, layout, terrainView, distanceInView, distanceOutView, uniformBuffer) {
+export function createBFTexBindGroup(device, layout, terrainView, distanceInView, distanceOutView, uniformBuffer) {
   return device.createBindGroup({
     layout,
     entries: [

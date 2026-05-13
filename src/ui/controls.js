@@ -1,7 +1,12 @@
 import { config, updateGoal, notifyConfigChange } from '../config.js';
-import { getAllShaderOptions } from '../bfs/shaderRegistry.js';
+import { getAllShaderOptions } from '../bf/shaderRegistry.js';
 
 export function initControls() {
+  const parseInteger = (value, fallback) => {
+    const parsed = parseInt(value, 10);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+
   // Populate shader dropdown initially
   populateShaderDropdown();
 
@@ -25,8 +30,9 @@ export function initControls() {
     notifyConfigChange();
   });
 
-  // BFS shader select
-  document.getElementById('bfsShader').addEventListener('change', (e) => {
+  // BF shader select
+  const shaderSelectInput = document.getElementById('bfShader');
+  shaderSelectInput?.addEventListener('change', (e) => {
     config.selectedShader = e.target.value;
     notifyConfigChange();
   });
@@ -47,20 +53,33 @@ export function initControls() {
 
   // Global iterations input
   document.getElementById('globalIterations').addEventListener('change', (e) => {
-    config.globalIterations = parseInt(e.target.value);
+    config.globalIterations = parseInteger(e.target.value, config.globalIterations);
     notifyConfigChange();
   });
 
-  // Inner iterations input
-  document.getElementById('innerIterations').addEventListener('change', (e) => {
-    config.innerIterations = parseInt(e.target.value);
+  // Workgroup inner iterations input
+  const innerIterationsWorkgroupInput =
+    document.getElementById('innerIterationsWorkgroup') || document.getElementById('innerIterations');
+  innerIterationsWorkgroupInput?.addEventListener('change', (e) => {
+    config.innerIterationsWorkgroup = parseInteger(e.target.value, config.innerIterationsWorkgroup);
+    notifyConfigChange();
+  });
+
+  // Subgroup inner iterations input
+  const innerIterationsSubgroupInput =
+    document.getElementById('innerIterationsSubgroup') || document.getElementById('innerIterationsS');
+  innerIterationsSubgroupInput?.addEventListener('change', (e) => {
+    config.innerIterationsSubgroup = parseInteger(e.target.value, config.innerIterationsSubgroup);
     notifyConfigChange();
   });
 }
 
 // Populate shader dropdown based on storage type
 function populateShaderDropdown() {
-  const select = document.getElementById('bfsShader');
+  const select = document.getElementById('bfShader');
+  if (!select) {
+    return;
+  }
   const options = getAllShaderOptions(config.useTextures);
 
   const currentSelection = config.selectedShader;

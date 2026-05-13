@@ -102,7 +102,7 @@ grid_buffer = device.create_buffer_with_data(
 
 
 # ----------------------
-# Storage textures for BFS-tex.wgsl
+# Storage textures for BF-tex.wgsl
 # ----------------------
 
 # Terrain as r32float storage texture
@@ -245,8 +245,8 @@ def read_distance_buffer(buffer: wgpu.GPUBuffer) -> np.ndarray:
     return result.reshape((GRID_SIZE, GRID_SIZE))
 
 
-def make_bfs_pipeline(shader_path: str):
-    """Create pipeline + bind-group layout for one BFS shader."""
+def make_bf_pipeline(shader_path: str):
+    """Create pipeline + bind-group layout for one BF shader."""
     p = Path(shader_path)
     if not p.exists():
         # Resolve relative to this script's directory (profiler.py),
@@ -255,7 +255,7 @@ def make_bfs_pipeline(shader_path: str):
     shader_source = p.read_text()
     shader_module = device.create_shader_module(code=shader_source)
 
-    bfs_bind_group_layout = device.create_bind_group_layout(
+    bf_bind_group_layout = device.create_bind_group_layout(
         entries=[
             {
                 "binding": 0,
@@ -280,29 +280,29 @@ def make_bfs_pipeline(shader_path: str):
         ]
     )
 
-    bfs_pipeline_layout = device.create_pipeline_layout(
-        bind_group_layouts=[bfs_bind_group_layout]
+    bf_pipeline_layout = device.create_pipeline_layout(
+        bind_group_layouts=[bf_bind_group_layout]
     )
 
-    bfs_pipeline = device.create_compute_pipeline(
-        layout=bfs_pipeline_layout,
+    bf_pipeline = device.create_compute_pipeline(
+        layout=bf_pipeline_layout,
         compute={"module": shader_module, "entry_point": "main"},
     )
 
-    return bfs_pipeline, bfs_bind_group_layout
+    return bf_pipeline, bf_bind_group_layout
 
 # ----------------------
-# Pipeline builder for BFS-tex.wgsl
+# Pipeline builder for BF-tex.wgsl
 # ----------------------
-def make_bfs_tex_pipeline(shader_path: str):
-    """Create pipeline + bind-group layout for BFS-tex.wgsl (storage textures)."""
+def make_bf_tex_pipeline(shader_path: str):
+    """Create pipeline + bind-group layout for BF-tex.wgsl (storage textures)."""
     p = Path(shader_path)
     if not p.exists():
         p = Path(__file__).parent.joinpath(shader_path)
     shader_source = p.read_text()
     shader_module = device.create_shader_module(code=shader_source)
 
-    bfs_tex_bgl = device.create_bind_group_layout(
+    bf_tex_bgl = device.create_bind_group_layout(
         entries=[
             {
                 "binding": 0,
@@ -339,25 +339,25 @@ def make_bfs_tex_pipeline(shader_path: str):
         ]
     )
 
-    bfs_tex_pl = device.create_pipeline_layout(bind_group_layouts=[bfs_tex_bgl])
+    bf_tex_pl = device.create_pipeline_layout(bind_group_layouts=[bf_tex_bgl])
 
-    bfs_tex_pipeline = device.create_compute_pipeline(
-        layout=bfs_tex_pl,
+    bf_tex_pipeline = device.create_compute_pipeline(
+        layout=bf_tex_pl,
         compute={"module": shader_module, "entry_point": "main"},
     )
 
-    return bfs_tex_pipeline, bfs_tex_bgl
+    return bf_tex_pipeline, bf_tex_bgl
 
 
-def run_bfs_variant(name: str, shader_path: str, iterations: int):
+def run_bf_variant(name: str, shader_path: str, iterations: int):
     print(f"\n=== {name} ===")
     print(f"Shader: {shader_path}, iterations: {iterations}")
 
-    bfs_pipeline, bfs_bgl = make_bfs_pipeline(shader_path)
+    bf_pipeline, bf_bgl = make_bf_pipeline(shader_path)
     distance_seed, distance_buffer_ping, distance_buffer_pong = make_distance_buffers()
 
     bind_group_ping = device.create_bind_group(
-        layout=bfs_bgl,
+        layout=bf_bgl,
         entries=[
             {"binding": 0, "resource": {"buffer": grid_buffer, "offset": 0, "size": terrain_flat.nbytes}},
             {"binding": 1, "resource": {"buffer": distance_buffer_ping, "offset": 0, "size": distance_seed.nbytes}},
@@ -366,7 +366,7 @@ def run_bfs_variant(name: str, shader_path: str, iterations: int):
         ],
     )
     bind_group_pong = device.create_bind_group(
-        layout=bfs_bgl,
+        layout=bf_bgl,
         entries=[
             {"binding": 0, "resource": {"buffer": grid_buffer, "offset": 0, "size": terrain_flat.nbytes}},
             {"binding": 1, "resource": {"buffer": distance_buffer_pong, "offset": 0, "size": distance_seed.nbytes}},
@@ -419,7 +419,7 @@ def run_bfs_variant(name: str, shader_path: str, iterations: int):
         else:
             compute_pass = encoder.begin_compute_pass()
 
-        compute_pass.set_pipeline(bfs_pipeline)
+        compute_pass.set_pipeline(bf_pipeline)
         compute_pass.set_bind_group(0, bind_group_ping if read_from_ping else bind_group_pong)
         compute_pass.dispatch_workgroups(DISPATCH_X, DISPATCH_Y)
         compute_pass.end()
@@ -495,20 +495,20 @@ def run_bfs_variant(name: str, shader_path: str, iterations: int):
 
 
 # ----------------------
-# Run BFS-tex.wgsl variant (storage textures)
+# Run BF-tex.wgsl variant (storage textures)
 # ----------------------
-def run_bfs_tex_variant(name: str, shader_path: str, iterations: int):
+def run_bf_tex_variant(name: str, shader_path: str, iterations: int):
     print(f"\n=== {name} ===")
     print(f"Shader: {shader_path}, iterations: {iterations}")
 
-    bfs_pipeline, bfs_bgl = make_bfs_tex_pipeline(shader_path)
+    bf_pipeline, bf_bgl = make_bf_tex_pipeline(shader_path)
 
     # Per-variant distance textures (ping/pong)
     dist_tex_ping, dist_view_ping = make_distance_texture_seed()
     dist_tex_pong, dist_view_pong = make_distance_texture_seed()
 
     bind_group_ping = device.create_bind_group(
-        layout=bfs_bgl,
+        layout=bf_bgl,
         entries=[
             {"binding": 0, "resource": terrain_view},
             {"binding": 1, "resource": dist_view_ping},
@@ -517,7 +517,7 @@ def run_bfs_tex_variant(name: str, shader_path: str, iterations: int):
         ],
     )
     bind_group_pong = device.create_bind_group(
-        layout=bfs_bgl,
+        layout=bf_bgl,
         entries=[
             {"binding": 0, "resource": terrain_view},
             {"binding": 1, "resource": dist_view_pong},
@@ -526,7 +526,7 @@ def run_bfs_tex_variant(name: str, shader_path: str, iterations: int):
         ],
     )
 
-    # Timestamp setup (identical to run_bfs_variant)
+    # Timestamp setup (identical to run_bf_variant)
     if can_timestamp:
         query_count = 2 * iterations
         slot_stride = 256
@@ -567,7 +567,7 @@ def run_bfs_tex_variant(name: str, shader_path: str, iterations: int):
         else:
             compute_pass = encoder.begin_compute_pass()
 
-        compute_pass.set_pipeline(bfs_pipeline)
+        compute_pass.set_pipeline(bf_pipeline)
         compute_pass.set_bind_group(0, bind_group_ping if read_from_ping else bind_group_pong)
         compute_pass.dispatch_workgroups(DISPATCH_X, DISPATCH_Y)
         compute_pass.end()
@@ -626,64 +626,64 @@ def run_bfs_tex_variant(name: str, shader_path: str, iterations: int):
 
 # Use whatever global iteration counts you consider "apples to apples".
 # These default to the notebook values you had:
-#   - BFS.wgsl: 1024 iterations
-#   - BFS-tiled.wgsl: 32 iterations
-#   - BFS-tiled-library.wgsl: 128 iterations
+#   - BF.wgsl: 1024 iterations
+#   - BF-tiled.wgsl: 32 iterations
+#   - BF-tiled-library.wgsl: 128 iterations
 # Point variants to shader files exported into tmp/Production-shaders.
 # profiler.py lives in tmp/Streamlined, so the relative path to Production-shaders is ../Production-shaders
 # All now use early out
 
 # variants = [
 #     # Storage buffer based variants:
-#     ("BFS naive",               "../Production-shaders/BFS.wgsl", 50),
-#     ("BFS tiled 8x8",               "../Production-shaders/8x8/StorageBufferBased/BFS-tiled-8x8.wgsl", 50),
-#     ("BFS tiled + library 8x8",     "../Production-shaders/8x8/StorageBufferBased/BFS-tiled-library-8x8.wgsl", 50),
-#     ("BFS tiled 16x16",               "../Production-shaders/16x16/StorageBufferBased/BFS-tiled-16x16.wgsl", 50),
-#     ("BFS tiled + library 16x16",     "../Production-shaders/16x16/StorageBufferBased/BFS-tiled-library-16x16.wgsl", 50),
-#     ("BFS tiled 32x32",               "../Production-shaders/32x32/StorageBufferBased/BFS-tiled-32x32.wgsl", 50),
-#     ("BFS tiled + library 32x32",     "../Production-shaders/32x32/StorageBufferBased/BFS-tiled-library-32x32.wgsl", 50),
+#     ("BF naive",               "../Production-shaders/BF.wgsl", 50),
+#     ("BF tiled 8x8",               "../Production-shaders/8x8/StorageBufferBased/BF-tiled-8x8.wgsl", 50),
+#     ("BF tiled + library 8x8",     "../Production-shaders/8x8/StorageBufferBased/BF-tiled-library-8x8.wgsl", 50),
+#     ("BF tiled 16x16",               "../Production-shaders/16x16/StorageBufferBased/BF-tiled-16x16.wgsl", 50),
+#     ("BF tiled + library 16x16",     "../Production-shaders/16x16/StorageBufferBased/BF-tiled-library-16x16.wgsl", 50),
+#     ("BF tiled 32x32",               "../Production-shaders/32x32/StorageBufferBased/BF-tiled-32x32.wgsl", 50),
+#     ("BF tiled + library 32x32",     "../Production-shaders/32x32/StorageBufferBased/BF-tiled-library-32x32.wgsl", 50),
 #     # Storage texture based variants:
-#     ("BFS tex naive",           "../Production-shaders/BFS-tex.wgsl", 50),
-#     ("BFS tex tiled 8x8",           "../Production-shaders/8x8/StorageTextureBased/BFS-tex-tiled-8x8.wgsl", 50),
-#     ("BFS tex tiled + library 8x8", "../Production-shaders/8x8/StorageTextureBased/BFS-tex-tiled-library-8x8.wgsl", 50),
-#     ("BFS tex tiled 16x16",           "../Production-shaders/16x16/StorageTextureBased/BFS-tex-tiled-16x16.wgsl", 50),
-#     ("BFS tex tiled + library 16x16", "../Production-shaders/16x16/StorageTextureBased/BFS-tex-tiled-library-16x16.wgsl", 50),
-#     ("BFS tex tiled 32x32",           "../Production-shaders/32x32/StorageTextureBased/BFS-tex-tiled-32x32.wgsl", 50),
-#     ("BFS tex tiled + library 32x32", "../Production-shaders/32x32/StorageTextureBased/BFS-tex-tiled-library-32x32.wgsl", 50),
+#     ("BF tex naive",           "../Production-shaders/BF-tex.wgsl", 50),
+#     ("BF tex tiled 8x8",           "../Production-shaders/8x8/StorageTextureBased/BF-tex-tiled-8x8.wgsl", 50),
+#     ("BF tex tiled + library 8x8", "../Production-shaders/8x8/StorageTextureBased/BF-tex-tiled-library-8x8.wgsl", 50),
+#     ("BF tex tiled 16x16",           "../Production-shaders/16x16/StorageTextureBased/BF-tex-tiled-16x16.wgsl", 50),
+#     ("BF tex tiled + library 16x16", "../Production-shaders/16x16/StorageTextureBased/BF-tex-tiled-library-16x16.wgsl", 50),
+#     ("BF tex tiled 32x32",           "../Production-shaders/32x32/StorageTextureBased/BF-tex-tiled-32x32.wgsl", 50),
+#     ("BF tex tiled + library 32x32", "../Production-shaders/32x32/StorageTextureBased/BF-tex-tiled-library-32x32.wgsl", 50),
 # ]
 
 # Reduction vs atomics
 # variants = [
 #     # Storage buffer based variants:
-#     ("BFS naive",                   "../Production-shaders/BFS.wgsl", 50),
-#     ("BFS tiled 16x16",             "../Production-shaders/16x16/StorageBufferBased/BFS-tiled-16x16.wgsl", 100),
-#     ("BFS tiled reduction 16x16",   "../Production-shaders/16x16/StorageBufferBased/BFS-tiled-16x16-reduction.wgsl", 100),
-#     ("BFS tiled 32x32",             "../Production-shaders/32x32/StorageBufferBased/BFS-tiled-32x32.wgsl", 50),
-#     ("BFS tiled reduction 32x32",   "../Production-shaders/32x32/StorageBufferBased/BFS-tiled-32x32-reduction.wgsl", 50),
+#     ("BF naive",                   "../Production-shaders/BF.wgsl", 50),
+#     ("BF tiled 16x16",             "../Production-shaders/16x16/StorageBufferBased/BF-tiled-16x16.wgsl", 100),
+#     ("BF tiled reduction 16x16",   "../Production-shaders/16x16/StorageBufferBased/BF-tiled-16x16-reduction.wgsl", 100),
+#     ("BF tiled 32x32",             "../Production-shaders/32x32/StorageBufferBased/BF-tiled-32x32.wgsl", 50),
+#     ("BF tiled reduction 32x32",   "../Production-shaders/32x32/StorageBufferBased/BF-tiled-32x32-reduction.wgsl", 50),
 # ]
 
 i = 370 
 
 # variants = [
 #     # Storage buffer based variants:
-#     ("BFS tiled 8x8",   "../Production-shaders/8x8/StorageBufferBased/BFS-tiled-8x8.wgsl", i),
-#     ("BFS tiled 16x16", "../Production-shaders/16x16/StorageBufferBased/BFS-tiled-16x16.wgsl", i),
-#     ("BFS tiled 32x32", "../Production-shaders/32x32/StorageBufferBased/BFS-tiled-32x32.wgsl", i),
+#     ("BF tiled 8x8",   "../Production-shaders/8x8/StorageBufferBased/BF-tiled-8x8.wgsl", i),
+#     ("BF tiled 16x16", "../Production-shaders/16x16/StorageBufferBased/BF-tiled-16x16.wgsl", i),
+#     ("BF tiled 32x32", "../Production-shaders/32x32/StorageBufferBased/BF-tiled-32x32.wgsl", i),
 # ]
 
 variants = [
-    ("BFS tiled 8x8",     "../Production-shaders/8x8/StorageBufferBased/BFS-tiled-8x8.wgsl", i),
-    ("BFS tiled + library 8x8",     "../Production-shaders/8x8/StorageBufferBased/BFS-tiled-library-8x8.wgsl", i),
-    ("BFS tex tiled 8x8", "../Production-shaders/8x8/StorageTextureBased/BFS-tex-tiled-8x8.wgsl", i),
-    ("BFS tex tiled + library 8x8", "../Production-shaders/8x8/StorageTextureBased/BFS-tex-tiled-library-8x8.wgsl", i),
+    ("BF tiled 8x8",     "../Production-shaders/8x8/StorageBufferBased/BF-tiled-8x8.wgsl", i),
+    ("BF tiled + library 8x8",     "../Production-shaders/8x8/StorageBufferBased/BF-tiled-library-8x8.wgsl", i),
+    ("BF tex tiled 8x8", "../Production-shaders/8x8/StorageTextureBased/BF-tex-tiled-8x8.wgsl", i),
+    ("BF tex tiled + library 8x8", "../Production-shaders/8x8/StorageTextureBased/BF-tex-tiled-library-8x8.wgsl", i),
 ]
 
 results = {}
 for name, shader, iters in variants:
     if "tex" in name:
-        field, ticks = run_bfs_tex_variant(name, shader, iters)
+        field, ticks = run_bf_tex_variant(name, shader, iters)
     else:
-        field, ticks = run_bfs_variant(name, shader, iters)
+        field, ticks = run_bf_variant(name, shader, iters)
     results[name] = {"distance_field": field, "ticks": ticks}
 
 # 'results' now holds distance fields and timing info for all four.

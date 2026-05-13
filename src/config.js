@@ -4,11 +4,12 @@
 export const config = {
   gridSize: 512,
   earlyOut: true,
-  globalIterations: 50,
-  innerIterations: 46,
+  globalIterations: 16,
+  innerIterationsWorkgroup: 4,
+  innerIterationsSubgroup: 4,
   goalX: 1,  // Changed from gridSize-3 to (1,1)
   goalY: 1,
-  selectedShader: 'BFS naive',
+  selectedShader: 'BF naive',
   useTextures: false,
   obstacleType: 'dla-maze',
   uniformCost: true,

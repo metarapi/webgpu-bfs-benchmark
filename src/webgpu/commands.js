@@ -29,9 +29,9 @@ export function createTimestampResources(device, iterations) {
 }
 
 /**
- * Encode BFS compute passes with ping-pong and timestamps
+ * Encode BF compute passes with ping-pong and timestamps
  */
-export function encodeBFSPasses(encoder, pipeline, bindGroupPing, bindGroupPong, dispatchX, dispatchY, iterations, timestampResources = null) {
+export function encodeBFPasses(encoder, pipeline, bindGroupPing, bindGroupPong, dispatchX, dispatchY, iterations, timestampResources = null) {
   let readFromPing = true;
 
   for (let i = 0; i < iterations; i++) {

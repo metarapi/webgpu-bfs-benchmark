@@ -2,9 +2,9 @@ import { createLogger } from './ui/logger.js';
 import { initControls } from './ui/controls.js';
 import { initWebGPU } from './webgpu/device.js';
 import { config, onConfigChange } from './config.js';
-import { getTerrain } from './bfs/terrain.js';
+import { getTerrain } from './bf/terrain.js';
 import { renderInputHeatmap, renderOutputHeatmap, handleResize } from './plots/heatmaps.js';
-import { runAllBFS } from './bfs/runner.js';
+import { runAllBF } from './bf/runner.js';
 
 // Initialize logger
 const logger = createLogger('console-output');
@@ -37,6 +37,7 @@ let prevConfig = { ...config };
     
     logger.success(`WebGPU initialized successfully`);
     logger.info(`Timestamp queries: ${gpuContext.canTimestamp ? 'Supported' : 'Not supported'}`);
+    logger.info(`Subgroups: ${gpuContext.canSubgroups ? 'Supported' : 'Not supported'}`);
     
     // Load and display initial terrain
     await updateInputHeatmap();
@@ -104,20 +105,20 @@ onConfigChange(() => {
   prevConfig = { ...config };
 });
 
-// Run BFS button handler
-document.getElementById('runBFS')?.addEventListener('click', async () => {
+// Run BF button handler
+document.getElementById('runBF')?.addEventListener('click', async () => {
   if (!gpuContext) {
     logger.error('WebGPU not initialized');
     return;
   }
   
   try {
-    benchmarkResults = await runAllBFS(gpuContext, config, logger);
+    benchmarkResults = await runAllBF(gpuContext, config, logger);
     
     // Display the selected shader result
     updateOutputHeatmap();
     
   } catch (err) {
-    logger.error(`BFS benchmark failed: ${err.message}`);
+    logger.error(`BF benchmark failed: ${err.message}`);
   }
 });

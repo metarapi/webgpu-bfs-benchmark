@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BFS Benchmark Dashboard</title>
+  <title>BF Benchmark Dashboard</title>
   <link href="/src/style.css" rel="stylesheet">
   <!-- Tabler Icons webfont (used for navbar GitHub icon) -->
   <link rel="stylesheet" href="https://unpkg.com/@tabler/icons-webfont@3.35.0/dist/tabler-icons.min.css">
@@ -24,7 +24,7 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center justify-start">
           <a href="#" class="flex ms-2 md:me-24">
-            <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-base-content">BFS Benchmark
+            <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-base-content">BF Benchmark
               Dashboard</span>
           </a>
         </div>
@@ -47,7 +47,7 @@
   <div class="pt-14 px-2 h-screen flex flex-row gap-2">
 
     <!-- Left Column (1 part) - Global Controls & Console -->
-    <div class="flex-[1] flex flex-col gap-2 min-w-0">
+    <div class="flex-1 flex flex-col gap-2 min-w-0">
       <!-- Global Controls -->
       <div class="p-2 border-2 border-base-300 rounded-none bg-base-200 flex-shrink-0">
         <h3 class="text-sm font-semibold mb-3 text-base-content">Global Settings</h3>
@@ -70,14 +70,20 @@
           <!-- Global Iterations -->
           <div class="flex-1">
             <label for="globalIterations" class="block mb-1 text-xs text-base-content/60">Global</label>
-            <input type="number" id="globalIterations" min="1" max="10000" value="50" class="bg-base-200 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-1">
+            <input type="number" id="globalIterations" min="1" max="10000" value="16" class="bg-base-200 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-1">
           </div>
           <!-- Inner/Workgroup Iterations -->
           <div class="flex-1">
-            <label for="innerIterations" class="block mb-1 text-xs text-base-content/60">Inner (WG)</label>
-            <input type="number" id="innerIterations" min="1" max="100" value="46" class="bg-base-200 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-1">
+            <label for="innerIterationsWorkgroup" class="block mb-1 text-xs text-base-content/60">Inner (WG)</label>
+            <input type="number" id="innerIterationsWorkgroup" min="1" max="100" value="4" class="bg-base-200 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-1">
+          </div>
+          <!-- Inner/Subgroup Iterations -->
+          <div class="flex-1">
+            <label for="innerIterationsSubgroup" class="block mb-1 text-xs text-base-content/60">Inner (SG)</label>
+            <input type="number" id="innerIterationsSubgroup" min="1" max="100" value="4" class="bg-base-200 border border-base-300 text-base-content text-sm focus:ring-primary focus:border-primary block w-full p-1">
           </div>
         </div>
+        
       </div>
 
         <!-- Storage Type Switch -->
@@ -97,9 +103,9 @@
         </div>
 
         <!-- Run Button -->
-        <button id="runBFS"
+        <button id="runBF"
           class="w-full text-primary-content bg-primary hover:bg-primary/90 focus:ring-4 focus:outline-none focus:ring-primary/60 font-medium text-sm px-5 py-2.5 text-center">
-          Run BFS Benchmark
+          Run BF Benchmark
         </button>
       </div>
 
@@ -115,7 +121,7 @@
     </div>
 
     <!-- Right Column (4 parts) - Plots & Settings -->
-    <div class="flex-[4] flex flex-col gap-2 min-w-0">
+    <div class="flex-4 flex flex-col gap-2 min-w-0">
 
       <!-- Top Row - Two Heatmaps -->
       <div class="flex-1 flex flex-row gap-2 min-h-0">
@@ -203,10 +209,10 @@
         <div class="flex-1 p-2 border-2 border-base-300 rounded-none bg-base-200">
           <h3 class="text-sm font-semibold mb-3 text-base-content">Output Map Settings</h3>
 
-          <!-- BFS Shader Select -->
+          <!-- BF Shader Select -->
           <div>
-            <label for="bfsShader" class="block mb-2 text-xs font-medium text-base-content/70 uppercase">Shader Output</label>
-            <select id="bfsShader"
+            <label for="bfShader" class="block mb-2 text-xs font-medium text-base-content/70 uppercase">Shader Output</label>
+            <select id="bfShader"
               class="bg-base-200 border border-base-300 text-base-content text-sm rounded-none focus:ring-primary focus:border-primary block w-full p-2">
               <!-- Options populated dynamically by JS -->
             </select>
